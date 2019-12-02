@@ -5,12 +5,16 @@ public class Day2
 	public static void main(String[] args)
 	{
 		String program = FileUtil.loadFile("res/day2-1.txt").get(0);
-		String[] programReset = program.split(",");
-		String[] programList = programReset.clone();
+		String[] rawStringList = program.split(",");
+		Integer[] programReset = new Integer[rawStringList.length];
+		for(int i = 0; i < rawStringList.length; i++)
+			programReset[i] = Integer.parseInt(rawStringList[i]);
+
+		Integer[] programList = programReset.clone();
 		int noun = -1;
 		int verb = 0;
 
-		while(!programList[0].equals("19690720"))
+		while(programList[0] != 19690720)
 		{
 			noun++;
 			if(noun == 100)
@@ -19,29 +23,23 @@ public class Day2
 				verb++;
 			}
 			programList = programReset.clone();
-			programList[1] = String.valueOf(noun);
-			programList[2] = String.valueOf(verb);
+			programList[1] = noun;
+			programList[2] = verb;
 			int pc = 0;
 			boolean run = true;
 			while(run)
 			{
-				int opcode = Integer.parseInt(programList[pc]);
-				int position1;
-				int position2;
+				int opcode = programList[pc];
 				int result;
 				switch(opcode)
 				{
 					case 1:
-						position1 = Integer.parseInt(programList[pc + 1]);
-						position2 = Integer.parseInt(programList[pc + 2]);
-						result = Integer.parseInt(programList[position1]) + Integer.parseInt(programList[position2]);
-						programList[Integer.parseInt(programList[pc + 3])] = String.valueOf(result);
+						result = programList[programList[pc + 1]] + programList[programList[pc + 2]];
+						programList[programList[pc + 3]] = result;
 						break;
 					case 2:
-						position1 = Integer.parseInt(programList[pc + 1]);
-						position2 = Integer.parseInt(programList[pc + 2]);
-						result = Integer.parseInt(programList[position1]) * Integer.parseInt(programList[position2]);
-						programList[Integer.parseInt(programList[pc + 3])] = String.valueOf(result);
+						result = programList[programList[pc + 1]] * programList[programList[pc + 2]];
+						programList[programList[pc + 3]] = result;
 						break;
 					default:
 						run = false;
