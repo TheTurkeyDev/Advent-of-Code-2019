@@ -23,105 +23,40 @@ public class Day7
 
 		for(Integer[] phases : phaseSettings)
 		{
-			boolean phaseInput = true;
-			int total = 0;
-			for(int j = 0; j < 5; j++)
+			IntCodeProgram[] programs = new IntCodeProgram[5];
+			boolean[] phaseInputs = new boolean[]{true, true, true, true, true};
+			for(int i = 0; i < programs.length; i++)
+				programs[i] = new IntCodeProgram(programReset);
+			int j = 0;
+			while(!programs[4].isHalted())
 			{
-				Integer[] programList = programReset.clone();
+				IntCodeProgram currentProgram = programs[j];
 
-				int pc = 0;
-				boolean run = true;
-				int[] params = new int[3];
-				boolean[] paramModes = new boolean[3];
-				while(run)
+				if(currentProgram.isWaitingForInput())
 				{
-					String instruction = String.valueOf(programList[pc]);
-					for(int i = instruction.length(); i < 5; i++)
-						instruction = "0" + instruction;
-
-					int opcode = Integer.parseInt(instruction.substring(instruction.length() - 2));
-					paramModes[0] = instruction.charAt(2) == '0';
-					paramModes[1] = instruction.charAt(1) == '0';
-					paramModes[2] = instruction.charAt(0) == '0';
-
-					int result;
-					switch(opcode)
+					if(phaseInputs[j])
 					{
-						case 1:
-							params[0] = getValueforParamMode(paramModes[0], programList, pc + 1);
-							params[1] = getValueforParamMode(paramModes[1], programList, pc + 2);
-							params[2] = programList[pc + 3];
-
-							result = params[0] + params[1];
-							programList[params[2]] = result;
-							pc += 4;
-							break;
-						case 2:
-							params[0] = getValueforParamMode(paramModes[0], programList, pc + 1);
-							params[1] = getValueforParamMode(paramModes[1], programList, pc + 2);
-							params[2] = programList[pc + 3];
-
-							result = params[0] * params[1];
-							programList[params[2]] = result;
-							pc += 4;
-							break;
-						case 3:
-							int input;
-							if(phaseInput)
-								input = phases[j];
-							else
-								input = total;
-							phaseInput = !phaseInput;
-
-							params[0] = programList[pc + 1];
-							programList[params[0]] = input;
-							pc += 2;
-							break;
-						case 4:
-							params[0] = getValueforParamMode(paramModes[0], programList, pc + 1);
-							total = params[0];
-							pc += 2;
-							run = false;
-							break;
-						case 5:
-							params[0] = getValueforParamMode(paramModes[0], programList, pc + 1);
-							params[1] = getValueforParamMode(paramModes[1], programList, pc + 2);
-							if(params[0] != 0)
-								pc = params[1];
-							else
-								pc += 3;
-							break;
-						case 6:
-							params[0] = getValueforParamMode(paramModes[0], programList, pc + 1);
-							params[1] = getValueforParamMode(paramModes[1], programList, pc + 2);
-							if(params[0] == 0)
-								pc = params[1];
-							else
-								pc += 3;
-							break;
-						case 7:
-							params[0] = getValueforParamMode(paramModes[0], programList, pc + 1);
-							params[1] = getValueforParamMode(paramModes[1], programList, pc + 2);
-							params[2] = programList[pc + 3];
-							programList[params[2]] = params[0] < params[1] ? 1 : 0;
-							pc += 4;
-							break;
-						case 8:
-							params[0] = getValueforParamMode(paramModes[0], programList, pc + 1);
-							params[1] = getValueforParamMode(paramModes[1], programList, pc + 2);
-							params[2] = programList[pc + 3];
-							programList[params[2]] = params[0] == params[1] ? 1 : 0;
-							pc += 4;
-							break;
-						default:
-							run = false;
-							break;
+						currentProgram.setInput(phases[j]);
+						phaseInputs[j] = false;
+					}
+					else
+					{
+						int lastProgram = j - 1;
+						if(lastProgram == -1)
+							lastProgram = 4;
+						currentProgram.setInput(programs[lastProgram].lastOutput);
 					}
 				}
+
+				currentProgram.execute();
+
+				j++;
+				if(j == 5)
+					j = 0;
 			}
 
-			if(total > largestTotal)
-				largestTotal = total;
+			if(programs[4].lastOutput > largestTotal)
+				largestTotal = programs[4].lastOutput;
 		}
 
 		System.out.println(largestTotal);
@@ -129,32 +64,23 @@ public class Day7
 		scanner.close();
 	}
 
-
-	public int getValueforParamMode(boolean posmode, Integer[] program, int pc)
-	{
-		if(posmode)
-			return program[program[pc]];
-		else
-			return program[pc];
-	}
-
 	public void generateCombintaions()
 	{
-		for(int i = 0; i < 5; i++)
+		for(int i = 5; i < 10; i++)
 		{
-			for(int j = 0; j < 5; j++)
+			for(int j = 5; j < 10; j++)
 			{
 				if(i == j)
 					continue;
-				for(int k = 0; k < 5; k++)
+				for(int k = 5; k < 10; k++)
 				{
 					if(i == k || j == k)
 						continue;
-					for(int l = 0; l < 5; l++)
+					for(int l = 5; l < 10; l++)
 					{
 						if(i == l || j == l || k == l)
 							continue;
-						for(int m = 0; m < 5; m++)
+						for(int m = 5; m < 10; m++)
 						{
 							if(i == m || j == m || k == m || l == m)
 								continue;
