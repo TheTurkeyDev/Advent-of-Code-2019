@@ -1,55 +1,56 @@
 package com.theprogrammingturkey.aoc2019;
 
+import java.util.Arrays;
+
 public class IntCodeProgram
 {
-	private Integer[] programList;
+	private long[] memory;
 	private int pc = 0;
+
 	private boolean isHalted = false;
 	private boolean run = true;
-	private int[] params = new int[3];
-	private boolean[] paramModes = new boolean[3];
+	private long[] params = new long[3];
+	private int[] paramModes = new int[3];
+	private int relativeBase = 0;
 
 	private boolean waitingForInput = false;
-	public int lastOutput = 0;
 
 
-	public IntCodeProgram(Integer[] programList)
+	public IntCodeProgram(long[] programList)
 	{
-		this.programList = programList;
+		memory = Arrays.copyOf(programList, 10000);
 	}
 
-	public void execute()
+	public void execute(Output out)
 	{
 		while(run && !isHalted)
 		{
-			String instruction = String.valueOf(programList[pc]);
+			String instruction = String.valueOf(memory[pc]);
 			for(int i = instruction.length(); i < 5; i++)
 				instruction = "0" + instruction;
 
 			int opcode = Integer.parseInt(instruction.substring(instruction.length() - 2));
-			paramModes[0] = instruction.charAt(2) == '0';
-			paramModes[1] = instruction.charAt(1) == '0';
-			paramModes[2] = instruction.charAt(0) == '0';
+			paramModes[0] = instruction.charAt(2) - 48;
+			paramModes[1] = instruction.charAt(1) - 48;
+			paramModes[2] = instruction.charAt(0) - 48;
 
-			int result;
+			long result;
 			switch(opcode)
 			{
 				case 1:
-					params[0] = getValueforParamMode(paramModes[0], programList, pc + 1);
-					params[1] = getValueforParamMode(paramModes[1], programList, pc + 2);
-					params[2] = programList[pc + 3];
+					params[0] = getValueforParamMode(paramModes[0], pc + 1);
+					params[1] = getValueforParamMode(paramModes[1], pc + 2);
 
 					result = params[0] + params[1];
-					programList[params[2]] = result;
+					setValueforParamMode(paramModes[2], pc + 3, result);
 					pc += 4;
 					break;
 				case 2:
-					params[0] = getValueforParamMode(paramModes[0], programList, pc + 1);
-					params[1] = getValueforParamMode(paramModes[1], programList, pc + 2);
-					params[2] = programList[pc + 3];
+					params[0] = getValueforParamMode(paramModes[0], pc + 1);
+					params[1] = getValueforParamMode(paramModes[1], pc + 2);
 
 					result = params[0] * params[1];
-					programList[params[2]] = result;
+					setValueforParamMode(paramModes[2], pc + 3, result);
 					pc += 4;
 					break;
 				case 3:
@@ -57,39 +58,42 @@ public class IntCodeProgram
 					waitingForInput = true;
 					break;
 				case 4:
-					params[0] = getValueforParamMode(paramModes[0], programList, pc + 1);
-					lastOutput = params[0];
+					params[0] = getValueforParamMode(paramModes[0], pc + 1);
+					out.write(params[0]);
 					pc += 2;
 					break;
 				case 5:
-					params[0] = getValueforParamMode(paramModes[0], programList, pc + 1);
-					params[1] = getValueforParamMode(paramModes[1], programList, pc + 2);
+					params[0] = getValueforParamMode(paramModes[0], pc + 1);
+					params[1] = getValueforParamMode(paramModes[1], pc + 2);
 					if(params[0] != 0)
-						pc = params[1];
+						pc = (int) params[1];
 					else
 						pc += 3;
 					break;
 				case 6:
-					params[0] = getValueforParamMode(paramModes[0], programList, pc + 1);
-					params[1] = getValueforParamMode(paramModes[1], programList, pc + 2);
+					params[0] = getValueforParamMode(paramModes[0], pc + 1);
+					params[1] = getValueforParamMode(paramModes[1], pc + 2);
 					if(params[0] == 0)
-						pc = params[1];
+						pc = (int) params[1];
 					else
 						pc += 3;
 					break;
 				case 7:
-					params[0] = getValueforParamMode(paramModes[0], programList, pc + 1);
-					params[1] = getValueforParamMode(paramModes[1], programList, pc + 2);
-					params[2] = programList[pc + 3];
-					programList[params[2]] = params[0] < params[1] ? 1 : 0;
+					params[0] = getValueforParamMode(paramModes[0], pc + 1);
+					params[1] = getValueforParamMode(paramModes[1], pc + 2);
+					setValueforParamMode(paramModes[2], pc + 3, params[0] < params[1] ? 1 : 0);
 					pc += 4;
 					break;
 				case 8:
-					params[0] = getValueforParamMode(paramModes[0], programList, pc + 1);
-					params[1] = getValueforParamMode(paramModes[1], programList, pc + 2);
-					params[2] = programList[pc + 3];
-					programList[params[2]] = params[0] == params[1] ? 1 : 0;
+					params[0] = getValueforParamMode(paramModes[0], pc + 1);
+					params[1] = getValueforParamMode(paramModes[1], pc + 2);
+					setValueforParamMode(paramModes[2], pc + 3, params[0] == params[1] ? 1 : 0);
 					pc += 4;
+					break;
+				case 9:
+					params[0] = getValueforParamMode(paramModes[0], pc + 1);
+					this.relativeBase += params[0];
+					pc += 2;
 					break;
 				default:
 					run = false;
@@ -104,12 +108,11 @@ public class IntCodeProgram
 		return waitingForInput;
 	}
 
-	public void setInput(int input)
+	public void setInput(long input)
 	{
 		if(waitingForInput)
 		{
-			params[0] = programList[pc + 1];
-			programList[params[0]] = input;
+			setValueforParamMode(paramModes[0], pc + 1, input);
 			pc += 2;
 			waitingForInput = false;
 			run = true;
@@ -121,11 +124,26 @@ public class IntCodeProgram
 		return isHalted;
 	}
 
-	public int getValueforParamMode(boolean posmode, Integer[] program, int pc)
+	public long getValueforParamMode(int posmode, int pc)
 	{
-		if(posmode)
-			return program[program[pc]];
+		if(posmode == 0)
+			return memory[(int) memory[pc]];
+		else if(posmode == 1)
+			return memory[pc];
 		else
-			return program[pc];
+			return memory[relativeBase + (int) memory[pc]];
+	}
+
+	public void setValueforParamMode(int posmode, int pc, long value)
+	{
+		if(posmode == 0 || posmode == 1)
+			memory[(int) memory[pc]] = value;
+		else
+			memory[relativeBase + (int) memory[pc]] = value;
+	}
+
+	public interface Output
+	{
+		void write(long out);
 	}
 }
