@@ -15,6 +15,14 @@ public class IntCodeProgram
 
 	private boolean waitingForInput = false;
 
+	public IntCodeProgram(String program)
+	{
+		String[] rawStringList = program.split(",");
+		long[] programList = new long[rawStringList.length];
+		for(int i = 0; i < rawStringList.length; i++)
+			programList[i] = Long.parseLong(rawStringList[i]);
+		memory = Arrays.copyOf(programList, 10000);
+	}
 
 	public IntCodeProgram(long[] programList)
 	{

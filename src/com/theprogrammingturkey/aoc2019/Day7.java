@@ -13,21 +13,18 @@ public class Day7
 		generateCombintaions();
 		Scanner scanner = new Scanner(System.in);
 		String program = FileUtil.loadFile("res/day7-1.txt").get(0);
-		String[] rawStringList = program.split(",");
-		Integer[] programReset = new Integer[rawStringList.length];
-		for(int i = 0; i < rawStringList.length; i++)
-			programReset[i] = Integer.parseInt(rawStringList[i]);
 
 
-		int largestTotal = 0;
+		long largestTotal = 0;
 
 		for(Integer[] phases : phaseSettings)
 		{
 			IntCodeProgram[] programs = new IntCodeProgram[5];
 			boolean[] phaseInputs = new boolean[]{true, true, true, true, true};
 			for(int i = 0; i < programs.length; i++)
-				programs[i] = new IntCodeProgram(programReset);
+				programs[i] = new IntCodeProgram(program);
 			int j = 0;
+			long[] lastOutput = new long[1];
 			while(!programs[4].isHalted())
 			{
 				IntCodeProgram currentProgram = programs[j];
@@ -41,22 +38,19 @@ public class Day7
 					}
 					else
 					{
-						int lastProgram = j - 1;
-						if(lastProgram == -1)
-							lastProgram = 4;
-						currentProgram.setInput(programs[lastProgram].lastOutput);
+						currentProgram.setInput(lastOutput[0]);
 					}
 				}
 
-				currentProgram.execute();
+				currentProgram.execute((out) -> lastOutput[0] = out);
 
 				j++;
 				if(j == 5)
 					j = 0;
 			}
 
-			if(programs[4].lastOutput > largestTotal)
-				largestTotal = programs[4].lastOutput;
+			if(lastOutput[0] > largestTotal)
+				largestTotal = lastOutput[0];
 		}
 
 		System.out.println(largestTotal);

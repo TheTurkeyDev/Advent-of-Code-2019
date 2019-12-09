@@ -8,12 +8,7 @@ public class Day9
 	{
 		Scanner scanner = new Scanner(System.in);
 		String program = FileUtil.loadFile("res/day9-1.txt").get(0);
-		String[] rawStringList = program.split(",");
-		long[] programList = new long[rawStringList.length];
-		for(int i = 0; i < rawStringList.length; i++)
-			programList[i] = Long.parseLong(rawStringList[i]);
-
-		IntCodeProgram currentProgram = new IntCodeProgram(programList);
+		IntCodeProgram currentProgram = new IntCodeProgram(program);
 
 		while(!currentProgram.isHalted())
 		{
