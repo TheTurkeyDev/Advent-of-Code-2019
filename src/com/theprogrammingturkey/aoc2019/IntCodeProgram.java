@@ -150,6 +150,11 @@ public class IntCodeProgram
 			memory[relativeBase + (int) memory[pc]] = value;
 	}
 
+	public void setMemory(int address, int value)
+	{
+		memory[address] = value;
+	}
+
 	public interface Output
 	{
 		void write(long out);
