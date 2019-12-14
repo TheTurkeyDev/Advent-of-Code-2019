@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Day14
 {
-	private int oreMade = 0;
+	private long oreMade = 0;
 	private HashMap<String, Long> avialable = new HashMap<>();
 	private HashMap<Component, List<Component>> recpies = new HashMap<>();
 
@@ -31,74 +31,61 @@ public class Day14
 			recpies.put(outComponent, inputs);
 		}
 
-		make("FUEL", 1);
+		request("FUEL", 1);
 		System.out.println("PART 1: " + oreMade);
+		System.out.println("Calculating part 2! This will take a long time!!!!");
 
-//		int low = 0;
-//		int high = 20000;
-//		while(low < high)
-//		{
-//			int mid = (low + high) / 2;
-//			oreMade = 0;
-//			components.clear();
-//			components.put("FUEL", 0L);
-//
-//			for(int i = 0; i < mid; i++)
-//				makeMore(fuelComponent);
-//
-//			if(oreMade > 1000000000000L)
-//				high = mid - 1;
-//			else if(oreMade < 1000000000000L)
-//				low = mid;
-//			System.out.println(low + " " + high + " " + oreMade);
-//		}
+		long low = 0;
+		long high = 5000000;
+		while(low < high)
+		{
+			long mid = (low + high) / 2;
+			oreMade = 0;
+			avialable.clear();
 
-		//System.out.println("PART 2: " + low);
+			request("FUEL", mid);
+			if(oreMade > 1000000000000L)
+				high = mid - 1;
+			else if(oreMade < 1000000000000L)
+				low = mid + 1;
+			System.out.println("Apart: " + (high - low));
+		}
+
+		System.out.println("PART 2: " + low);
 	}
 
-	public long make(String key, long amount)
+	public void request(String key, long amount)
 	{
-		System.out.println("MAKE: " + amount + " of " + key);
-		if(key.equals("ORE"))
+		Component out = null;
+		for(Component c : recpies.keySet())
+			if(c.name.equals(key))
+				out = c;
+
+		long made = avialable.computeIfAbsent(out.name, k -> 0L);
+
+		long multiplier = 0;
+		while(made < amount)
 		{
-			//System.out.println("MAKE: " + oreMade);
-			oreMade += amount;
-			return amount;
+			made += out.amount;
+			multiplier++;
 		}
-		if(avialable.containsKey(key))
+
+		for(Component input : recpies.get(out))
 		{
-			long have = avialable.get(key);
-			if(have >= amount)
+			long needed = input.amount * multiplier;
+			if(input.name.equals("ORE"))
 			{
-				avialable.put(key, have - amount);
-				return amount;
+				oreMade += needed;
 			}
 			else
 			{
-				amount -= avialable.remove(key);
+				request(input.name, needed);
+				avialable.put(input.name, avialable.get(input.name) - needed);
 			}
 		}
 
-		List<Component> inputs = null;
-		long yield = 0;
-		for(Component c : recpies.keySet())
-		{
-			if(c.name.equals(key))
-			{
-				inputs = recpies.get(c);
-				yield = c.amount;
-			}
-		}
 
-		amount = (amount / yield) + (amount % yield == 0 ? 0 : 1);
-		for(Component input : inputs)
-		{
-			long toMake = (input.amount * amount);
-			long made = make(input.name, toMake);
-			if(made > toMake)
-				avialable.put(input.name, made - toMake);
-		}
-		return amount * yield;
+		avialable.put(key, made);
 	}
 
 	public static class Component
@@ -117,5 +104,4 @@ public class Day14
 	{
 		new Day14();
 	}
-
 }
