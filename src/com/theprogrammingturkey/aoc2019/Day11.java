@@ -11,7 +11,7 @@ public class Day11
 	private boolean colorOutput = true;
 	private Direction currentDirection = Direction.NORTH;
 	private Vector2I currentLocation = new Vector2I(0, 0);
-	private Map<String, Integer> colors = new HashMap<>();
+	private Map<Vector2I, Integer> colors = new HashMap<>();
 
 	public Day11()
 	{
@@ -19,7 +19,7 @@ public class Day11
 		String program = FileUtil.loadFile("res/day11-1.txt").get(0);
 		IntCodeProgram currentProgram = new IntCodeProgram(program);
 
-		colors.put(currentLocation.toString(), 1);
+		colors.put(new Vector2I(currentLocation), 1);
 
 		int[] panelsPainted = new int[]{0};
 		while(!currentProgram.isHalted())
@@ -27,7 +27,7 @@ public class Day11
 
 			if(currentProgram.isWaitingForInput())
 			{
-				int colorAtPanel = colors.computeIfAbsent(currentLocation.toString(), k -> 0);
+				int colorAtPanel = colors.computeIfAbsent(new Vector2I(currentLocation), k -> 0);
 				if(colorAtPanel > 1)
 					colorAtPanel -= 2;
 				currentProgram.setInput(colorAtPanel);
@@ -35,10 +35,10 @@ public class Day11
 
 			currentProgram.execute((out) ->
 			{
-				int currentPanelColor = colors.get(currentLocation.toString());
+				int currentPanelColor = colors.get(currentLocation);
 				if(colorOutput)
 				{
-					colors.put(currentLocation.toString(), (int) out + 2);
+					colors.put(new Vector2I(currentLocation), (int) out + 2);
 					if(currentPanelColor < 2 && currentPanelColor != out)
 						panelsPainted[0]++;
 				}
@@ -52,42 +52,37 @@ public class Day11
 
 		//System.out.println("Part 1: " + panelsPainted[0]);
 
-		List<String> sortedPositions = new ArrayList<>(colors.keySet());
+		List<Vector2I> sortedPositions = new ArrayList<>(colors.keySet());
 		sortedPositions.sort((o1, o2) ->
 		{
-			int o1x = Integer.parseInt(o1.substring(1, o1.indexOf(",")));
-			int o2x = Integer.parseInt(o2.substring(1, o2.indexOf(",")));
-			int o1y = Integer.parseInt(o1.substring(o1.indexOf(",") + 1, o1.indexOf(")")));
-			int o2y = Integer.parseInt(o2.substring(o2.indexOf(",") + 1, o2.indexOf(")")));
-			if(o1y != o2y)
-				return Integer.compare(o2y, o1y);
+			if(o1.y != o2.y)
+				return Integer.compare(o2.y, o1.y);
 			else
-				return Integer.compare(o1x, o2x);
+				return Integer.compare(o1.x, o2.x);
 		});
 
 		int smallestX = Integer.MAX_VALUE;
-		for(String vec : sortedPositions)
+		for(Vector2I vec : sortedPositions)
 		{
-			int x = Integer.parseInt(vec.substring(1, vec.indexOf(",")));
-			if(smallestX > x)
-				smallestX = x;
+			if(smallestX > vec.x)
+				smallestX = vec.x;
 		}
 
 		int currenty = 0;
-		for(String vec : sortedPositions)
+		for(Vector2I vec : sortedPositions)
 		{
-			int x = Integer.parseInt(vec.substring(1, vec.indexOf(",")));
-			int y = Integer.parseInt(vec.substring(vec.indexOf(",") + 1, vec.indexOf(")")));
-			if(currenty != y)
+			if(currenty != vec.y)
 			{
-				currenty = y;
+				currenty = vec.y;
 				System.out.println();
+				int x = vec.x;
 				while(x > smallestX)
 				{
 					System.out.print(" ");
 					x--;
 				}
 			}
+
 			if(colors.get(vec) % 2 == 1)
 				System.out.print("█");
 			else
@@ -160,40 +155,6 @@ public class Day11
 				default:
 					return this;
 			}
-		}
-	}
-
-	public static class Vector2I
-	{
-		public int x;
-		public int y;
-
-		public Vector2I(int x, int y)
-		{
-			this.x = x;
-			this.y = y;
-		}
-
-		@Override
-		public String toString()
-		{
-			return "(" + x + "," + y + ")";
-		}
-
-		@Override
-		public boolean equals(Object obj)
-		{
-			if(!(obj instanceof Day10.Vector2I))
-				return false;
-
-			Day10.Vector2I vec = (Day10.Vector2I) obj;
-			return vec.x == x && vec.y == y;
-		}
-
-		@Override
-		public int hashCode()
-		{
-			return (x + "" + y).hashCode();
 		}
 	}
 }

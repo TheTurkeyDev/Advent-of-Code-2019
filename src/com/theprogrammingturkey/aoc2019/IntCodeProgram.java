@@ -155,6 +155,11 @@ public class IntCodeProgram
 		memory[address] = value;
 	}
 
+	public void haltProgram()
+	{
+		this.isHalted = true;
+	}
+
 	public interface Output
 	{
 		void write(long out);

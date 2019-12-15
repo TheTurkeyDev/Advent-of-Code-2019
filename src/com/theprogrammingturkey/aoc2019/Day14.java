@@ -48,6 +48,8 @@ public class Day14
 				high = mid - 1;
 			else if(oreMade < 1000000000000L)
 				low = mid + 1;
+			else
+				low = mid;
 			System.out.println("Apart: " + (high - low));
 		}
 

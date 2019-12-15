@@ -124,7 +124,7 @@ public class Day10
 			}
 		}
 
-		System.out.println("Part 2: " + lastDestroyed.hashCode());
+		System.out.println("Part 2: " + (lastDestroyed.x * 100 + lastDestroyed.y));
 	}
 
 	public int findGCF(int x, int y)
@@ -139,44 +139,5 @@ public class Day10
 	public static void main(String[] args)
 	{
 		new Day10();
-	}
-
-	public static class Vector2I
-	{
-		public int x;
-		public int y;
-
-		public Vector2I(int x, int y)
-		{
-			this.x = x;
-			this.y = y;
-		}
-
-		public double distanceTo(Vector2I vec)
-		{
-			return Math.pow(vec.x - x, 2) + Math.pow(vec.y - y, 2);
-		}
-
-		@Override
-		public String toString()
-		{
-			return "(" + x + "," + y + ")";
-		}
-
-		@Override
-		public boolean equals(Object obj)
-		{
-			if(!(obj instanceof Vector2I))
-				return false;
-
-			Vector2I vec = (Vector2I) obj;
-			return vec.x == x && vec.y == y;
-		}
-
-		@Override
-		public int hashCode()
-		{
-			return x * 100 + y;
-		}
 	}
 }
