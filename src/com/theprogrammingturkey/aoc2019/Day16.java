@@ -54,23 +54,16 @@ public class Day16
 
 		fft = list.toArray(new Integer[0]);
 
-		long time = System.currentTimeMillis();
-		System.out.println("Beginning part 2");
 		for(int i = 0; i < 100; i++)
 		{
 			Integer[] newfft = fft.clone();
-			for(int j = firstSeven; j < fft.length; j++)
+			int val = 0;
+			for(int j = fft.length - 1; j >= firstSeven; j--)
 			{
-				int val = 0;
-				for(int k = j; k < fft.length; k++)
-				{
-					val += fft[k];
-				}
+				val += fft[j];
 				newfft[j] = Math.abs(val) % 10;
 			}
 			fft = newfft;
-			System.out.println("Here: " + (System.currentTimeMillis() - time));
-			time = System.currentTimeMillis();
 		}
 
 		System.out.println(Arrays.toString(Arrays.copyOfRange(fft, firstSeven, firstSeven + 8)));
