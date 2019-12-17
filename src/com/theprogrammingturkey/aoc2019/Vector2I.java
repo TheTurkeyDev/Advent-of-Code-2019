@@ -22,6 +22,22 @@ public class Vector2I
 		return Math.pow(vec.x - x, 2) + Math.pow(vec.y - y, 2);
 	}
 
+	public Vector2I move(Direction dir)
+	{
+		switch(dir)
+		{
+			case North:
+				return new Vector2I(x, y - 1);
+			case South:
+				return new Vector2I(x, y + 1);
+			case East:
+				return new Vector2I(x + 1, y);
+			case West:
+				return new Vector2I(x - 1, y);
+		}
+		return new Vector2I(this);
+	}
+
 	@Override
 	public String toString()
 	{
