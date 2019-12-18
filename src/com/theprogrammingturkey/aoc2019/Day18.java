@@ -6,6 +6,8 @@ import java.util.List;
 
 public class Day18
 {
+	private List<Node> doors = new ArrayList<>();
+
 	public Day18()
 	{
 		List<String> input = FileUtil.loadFile("res/day18-1.txt");
@@ -21,6 +23,8 @@ public class Day18
 
 				if(line.charAt(col) == '@')
 					currentPos = new Vector2I(col, row);
+				else if(Character.isUpperCase(line.charAt(col)))
+					doors.add(new Node(line.charAt(col), 0, new Vector3I(col, row, 0)));
 			}
 		}
 
@@ -62,19 +66,17 @@ public class Day18
 
 		for(Node n : nodes)
 		{
-//			if(parent == '@')
-//				System.out.println("Here " + nodes.size());
+			if(parent == '@')
+				System.out.println("Here " + nodes.size());
 			char[][] mapCopy = new char[map.length][map[0].length];
 
 			for(int row = 0; row < mapCopy.length; row++)
-			{
 				mapCopy[row] = map[row].clone();
-				for(int col = 0; col < mapCopy[row].length; col++)
-					if(mapCopy[row][col] == Character.toUpperCase(n.c))
-						mapCopy[row][col] = '.';
-			}
 
 			mapCopy[n.vec.y][n.vec.x] = '.';
+			for(Node door: doors)
+				if(Character.toLowerCase(door.c) == n.c)
+					mapCopy[door.vec.y][door.vec.x] = '.';
 
 			int pathSteps = findShortestSteps(mapCopy, new Vector2I(n.vec.x, n.vec.y), n.c);
 			if(steps == 0 || n.dist + pathSteps < steps)
